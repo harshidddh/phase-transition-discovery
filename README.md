@@ -1,33 +1,27 @@
-# Unsupervised ML Discovery of Phase Transitions in the 2D Ising Model
+# 2D Ising Model: Phase Transition Analysis via Unsupervised ML
+
+This repository contains a computational pipeline that simulates the 2D Ising model using Markov Chain Monte Carlo (MCMC) and applies unsupervised machine learning (PCA and K-Means) to identify thermodynamic phase transitions.
 
 ## Project Overview
-This project unites Statistical Mechanics and Machine Learning by showing how unsupervised dimensionality reduction and clustering algorithms can autonomously "discover" thermodynamic phase transitions without any prior physical labels.
+The objective of this project is to determine if dimensionality reduction and clustering algorithms can identify the critical phase transition and order parameter of a ferromagnet without prior integration of physical equations of state.
 
-The dataset is generated from scratch using a custom python script of the Metropolis-Hastings Markov Chain Monte Carlo (MCMC) algorithm to simulate the Ferromagnetic Ising Model
+## Repository Structure
+* `src/`: Physics engine (2D lattice initialization, Metropolis dynamics, data sampling).
+* `ml/`: Machine learning modules (PCA dimensionality reduction, K-Means clustering).
+* `experiments/`: Jupyter notebook for data analysis and physical validation.
+* `figures/`: Visual outputs of the ML and physical analysis.
+* `report/`: LaTeX manuscript detailing the theoretical background and methodology.
 
-## Physics Engine/Data Generation
-The system is modeled on an $N \times N$ square lattice with periodic boundary conditions. The Hamiltonian governing the interacting spins $s_i \in \{-1, +1\}$ is given by:
+## Methodology
+1. **Simulation (Data Generation):** A $30 \times 30$ lattice of interacting spins is simulated across a temperature range ($T=1.0$ to $T=4.0$). The system is thermalized for 2,000 sweeps using the Metropolis algorithm. 200 independent configurations are sampled per temperature step to generate the dataset.
+2. **Machine Learning:** The spin configurations are flattened and processed using Principal Component Analysis (PCA). K-Means clustering is applied to the latent space to classify the system into distinct macroscopic states.
+3. **Analysis:** The primary principal component (`PC1`) is evaluated against the computationally derived physical Magnetization ($\langle |M| \rangle$). 
 
-$$H = -J \sum_{\langle i, j \rangle} s_i s_j$$
+## Results
+* **Order Parameter:** The dominant latent variable (`PC1`) correlates directly with the physical magnetization of the system across the temperature gradient.
+* **Critical Temperature Estimation:** By calculating the peak variance of `PC1` (serving as an analog to magnetic susceptibility), the unsupervised pipeline estimates a pseudo-critical temperature of $T_c \approx 2.241$ for the $N=30$ lattice. This is consistent with finite-size scaling expectations compared to the Onsager exact solution for an infinite lattice ($T_c \approx 2.269$).
 
-Using the Metropolis-Hastings algorithm, the system is allowed to reach thermal equilibrium across a temperature sweep from $T=1.0$ to $T=4.0$. At each temperature, microstate configurations are flattened into high-dimensional vectors (e.g., $3600$ dimensions for a $60 \times 60$ lattice) to serve as the dataset for the ML pipeline.
-
-## Machine Learning Pipeline
-Rather than explicitly calculating physical observables to find the critical temperature $T_c$, I deployed Unsupervised Machine Learning to let the geometry of the data reveal the physics:
-* **Dimensionality Reduction (PCA):** Principal Component Analysis was used to project the high-dimensional spin states into a 2D latent space. The first principal component (PC1) autonomously learned to represent the broken symmetry of the system, perfectly mimicking the physical Order Parameter (Magnetization).
-* **Unsupervised Clustering (K-Means):** The latent projections were fed into a K-Means clustering algorithm ($k=3$). The algorithm successfully partitioned the data into Spin-Up (Ferromagnetic), Spin-Down (Ferromagnetic), and Disordered (Paramagnetic) phases without being fed temperature labels.
-
-## Observability & Validation
-To verify what the AI is actually predicting, we cross-checked the results against some classic statistical mechanics benchmarks:
-
-1. **We superimposed the AI’s latent signal onto the theory’s order parameter. On a two-axis plot, the normalized PC1 vector correlated almost perfectly to the magnitude of the magnetization vector $\langle |M| \rangle$ over time. This shows a high degree of correlation.
-
-2. **- We calculated the magnetic susceptibility via the rate of change of magnetization over time. The formula used is as follows:
-     $$\chi = \frac{N^2}{T} (\langle |M|^2 \rangle - \langle |M| \rangle^2)$$
-    The resulting plot correctly showed a massive divergence exactly at Lars Onsager's analytical solution for the critical temperature ($T_c \approx 2.269$).
-
-## Technologies Used
-* **Python:** Core simulation logic.
-* **NumPy:** Vectorized lattice operations and efficient Boltzmann probability calculations.
-* **Scikit-Learn:** PCA and K-Means implementation.
-* **Matplotlib:** Visualization of phase transitions, latent spaces, and thermodynamic observables.
+## Usage
+1. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
