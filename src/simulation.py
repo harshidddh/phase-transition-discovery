@@ -1,5 +1,6 @@
 import numpy as np
 from src.metropolis import metropolis_step
+from src.observables import magnetization, susceptibility
 
 def run_thermalization(grid: np.ndarray, T: float, steps: int) -> np.ndarray:
     """
@@ -31,8 +32,11 @@ def generate_configurations(grid: np.ndarray, T: float, n_samples: int, sample_i
         list: A list of flattened 1D arrays representing the microstates.
     """
     samples = []
+    magnetizations = []
     for _ in range(n_samples):
         for _ in range(sample_interval):
             grid = metropolis_step(grid, T)
         samples.append(grid.flatten())
-    return samples
+        m = magnetization(grid)
+        magnetizations.append(m)
+    return samples, magnetizations

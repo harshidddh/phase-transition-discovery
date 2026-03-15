@@ -10,17 +10,19 @@ def build_dataset(N: int, T_range: np.ndarray, therm_steps: int, n_samples: int,
     """
     X = []
     y_temp = []
+    magnetization_data = []
     
     print(f"Generating dataset for {len(T_range)} temperatures...")
     for T in tqdm(T_range):
         grid = initialize_lattice(N)
         grid = run_thermalization(grid, T, therm_steps)
         
-        configs = generate_configurations(grid, T, n_samples, interval)
+        configs, mags = generate_configurations(grid, T, n_samples, interval)
         X.extend(configs)
         y_temp.extend([T] * n_samples)
+        magnetization_data.append(mags)
         
-    return np.array(X), np.array(y_temp)
+    return np.array(X), np.array(y_temp), np.array(magnetization_data)
 
 def save_dataset(X: np.ndarray, y: np.ndarray, filepath: str = "data/"):
     """Saves the generated features and labels to disk."""
